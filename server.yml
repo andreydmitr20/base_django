@@ -1,0 +1,87 @@
+version: "3.5"
+services:
+  # db:
+  #   env_file: .env
+  #   image: postgres:14.1-alpine
+  #   restart: always
+  #   environment:
+  #     POSTGRES_USER: ${db_user}
+  #     POSTGRES_PASSWORD: ${db_pass}
+  #     # POSTGRES_DB: ${db_user}
+  #   volumes:
+  #     - db-data:/var/lib/postgresql/data
+  #   # expose:
+  #   #   - "5432"
+  #   ports:
+  #     - "5432:5432"
+  #   healthcheck:
+  #     test: pg_isready -U ${db_user}
+  #     interval: 2s
+  #     timeout: 3s
+  #     retries: 40
+  #   logging:
+  #     options:
+  #       max-size: "10m"
+  #       max-file: "1"
+
+  # rabbit:
+  #   env_file: .env
+  #   image: rabbitmq:3.12-management
+  #   restart: always
+  #   volumes:
+  #     - rabbit-data:/var/lib/rabbitmq
+  #   environment:
+  #     RABBITMQ_DEFAULT_USER: ${rabbit_user}
+  #     RABBITMQ_DEFAULT_PASS: ${rabbit_pass}
+  #     RABBITMQ_NODE_PORT: ${rabbit_port}
+  #     RABBITMQ_NODENAME: ${rabbit_host}
+  #   ports:
+  #     - "15672:15672"
+  #     - "5672:5672"
+  #   healthcheck:
+  #     test: rabbitmq-diagnostics -q ping
+  #     interval: 2s
+  #     timeout: 3s
+  #     retries: 40
+  #   logging:
+  #     options:
+  #       max-size: "10m"
+  #       max-file: "1"
+
+  # front:
+  #   env_file: .env
+  #   build:
+  #     context: .
+  #     dockerfile: ./Dockerfile.front
+  #   restart: always
+  #   depends_on:
+  #     - db
+  #     - rabbit
+  #   ports:
+  #     - "80:8080"
+  #   logging:
+  #     options:
+  #       max-size: "10m"
+  #       max-file: "1"
+
+  back:
+    env_file: .env
+    build:
+      context: .
+      dockerfile: ./Dockerfile.back
+    restart: always
+    # depends_on:
+    #   - db
+    #   - rabbit
+    logging:
+      options:
+        max-size: "10m"
+        max-file: "1"
+
+volumes:
+  db-data:
+    name: db-data
+    external: true
+  rabbit-data:
+    name: rabbit-data
+    external: true

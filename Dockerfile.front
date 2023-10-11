@@ -1,0 +1,26 @@
+FROM python:3.11-bullseye
+ENV PYTHONDONTWRITEBYTECODE 1
+ENV PYTHONUNBUFFERED 1
+
+RUN apt-get update && apt-get upgrade -y
+
+WORKDIR /front
+COPY ./requirements.txt ./
+RUN pip install -r ./requirements.txt
+RUN pip install --upgrade 'sentry-sdk[flask]'
+
+COPY ./web ./web
+
+# COPY ./.env ./
+COPY ./config.py ./
+COPY ./migrations ./migrations
+COPY ./models ./web/models
+COPY ./lib ./lib
+COPY ./alembic.ini ./
+COPY ./ini.gunicorn.py ./
+COPY ./app.py ./
+COPY ./cli.py ./
+
+COPY ./entrypoint.front.sh ./
+RUN chmod +x entrypoint.front.sh
+ENTRYPOINT ["bash", "entrypoint.front.sh"]
