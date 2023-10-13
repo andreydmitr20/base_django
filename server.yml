@@ -1,21 +1,41 @@
-version: "3.5"
+version: "3.8"
 services:
-  # db:
+  db:
+    env_file: .env
+    image: postgres:14.1-alpine
+    restart: always
+    environment:
+      POSTGRES_USER: ${db_user}
+      POSTGRES_PASSWORD: ${db_pass}
+      POSTGRES_DB: ${db_name}
+    volumes:
+      - db-volume:/var/lib/postgresql/data
+    ports:
+      - "${db_port}:5432"
+    mem_limit: 500M
+    mem_reservation: 100m
+    cpus: 0.3
+    healthcheck:
+      test: pg_isready -U ${db_user}
+      interval: 2s
+      timeout: 3s
+      retries: 40
+    logging:
+      options:
+        max-size: "10m"
+        max-file: "1"
+
+  # redis:
   #   env_file: .env
-  #   image: postgres:14.1-alpine
+  #   image: redis:6
   #   restart: always
-  #   environment:
-  #     POSTGRES_USER: ${db_user}
-  #     POSTGRES_PASSWORD: ${db_pass}
-  #     # POSTGRES_DB: ${db_user}
-  #   volumes:
-  #     - db-data:/var/lib/postgresql/data
-  #   # expose:
-  #   #   - "5432"
   #   ports:
-  #     - "5432:5432"
+  #     - "${redis_port}:6379"
+  #   mem_limit: 500M
+  #   mem_reservation: 100m
+  #   cpus: 0.3
   #   healthcheck:
-  #     test: pg_isready -U ${db_user}
+  #     test: ["CMD-SHELL", "redis-cli ping | grep PONG"]
   #     interval: 2s
   #     timeout: 3s
   #     retries: 40
@@ -37,7 +57,7 @@ services:
   #     RABBITMQ_NODENAME: ${rabbit_host}
   #   ports:
   #     - "15672:15672"
-  #     - "5672:5672"
+  #     - "${rabbit_port}:5672"
   #   healthcheck:
   #     test: rabbitmq-diagnostics -q ping
   #     interval: 2s
@@ -47,22 +67,17 @@ services:
   #     options:
   #       max-size: "10m"
   #       max-file: "1"
+  #   mem_limit: 500M
+  #   mem_reservation: 500m
+  #   cpus: 1
 
-  # front:
-  #   env_file: .env
-  #   build:
-  #     context: .
-  #     dockerfile: ./Dockerfile.front
-  #   restart: always
-  #   depends_on:
-  #     - db
-  #     - rabbit
-  #   ports:
-  #     - "80:8080"
-  #   logging:
-  #     options:
-  #       max-size: "10m"
-  #       max-file: "1"
+volumes:
+  db-volume:
+    name: db-volume
+    external: true
+  # rabbit-volume:
+  #   name: rabbit-volume
+  #   external: true
 
   back:
     env_file: .env
@@ -70,18 +85,10 @@ services:
       context: .
       dockerfile: ./Dockerfile.back
     restart: always
-    # depends_on:
-    #   - db
+    depends_on:
+      - db
     #   - rabbit
     logging:
       options:
         max-size: "10m"
-        max-file: "1"
-
-volumes:
-  db-data:
-    name: db-data
-    external: true
-  rabbit-data:
-    name: rabbit-data
-    external: true
+        max-file: "1
