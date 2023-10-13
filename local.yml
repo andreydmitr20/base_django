@@ -7,8 +7,9 @@ services:
     environment:
       POSTGRES_USER: ${db_user}
       POSTGRES_PASSWORD: ${db_pass}
+      POSTGRES_DB: ${db_name}
     volumes:
-      - db-data:/var/lib/postgresql/data
+      - db-volume:/var/lib/postgresql/data
     ports:
       - "${db_port}:5432"
     mem_limit: 500M
@@ -24,56 +25,56 @@ services:
         max-size: "10m"
         max-file: "1"
 
-  redis:
-    env_file: .env
-    image: redis:6
-    restart: always
-    ports:
-      - "${redis_port}:6379"
-    mem_limit: 500M
-    mem_reservation: 100m
-    cpus: 0.3
-    healthcheck:
-      test: ["CMD-SHELL", "redis-cli ping | grep PONG"]
-      interval: 2s
-      timeout: 3s
-      retries: 40
-    logging:
-      options:
-        max-size: "10m"
-        max-file: "1"
+  # redis:
+  #   env_file: .env
+  #   image: redis:6
+  #   restart: always
+  #   ports:
+  #     - "${redis_port}:6379"
+  #   mem_limit: 500M
+  #   mem_reservation: 100m
+  #   cpus: 0.3
+  #   healthcheck:
+  #     test: ["CMD-SHELL", "redis-cli ping | grep PONG"]
+  #     interval: 2s
+  #     timeout: 3s
+  #     retries: 40
+  #   logging:
+  #     options:
+  #       max-size: "10m"
+  #       max-file: "1"
 
-  rabbit:
-    env_file: .env
-    image: rabbitmq:3.12-management
-    restart: always
-    volumes:
-      - rabbit-data:/var/lib/rabbitmq
-    environment:
-      RABBITMQ_DEFAULT_USER: ${rabbit_user}
-      RABBITMQ_DEFAULT_PASS: ${rabbit_pass}
-      RABBITMQ_NODE_PORT: ${rabbit_port}
-      RABBITMQ_NODENAME: ${rabbit_host}
-    ports:
-      - "15672:15672"
-      - "${rabbit_port}:5672"
-    healthcheck:
-      test: rabbitmq-diagnostics -q ping
-      interval: 2s
-      timeout: 3s
-      retries: 40
-    logging:
-      options:
-        max-size: "10m"
-        max-file: "1"
-    mem_limit: 500M
-    mem_reservation: 500m
-    cpus: 1
+  # rabbit:
+  #   env_file: .env
+  #   image: rabbitmq:3.12-management
+  #   restart: always
+  #   volumes:
+  #     - rabbit-data:/var/lib/rabbitmq
+  #   environment:
+  #     RABBITMQ_DEFAULT_USER: ${rabbit_user}
+  #     RABBITMQ_DEFAULT_PASS: ${rabbit_pass}
+  #     RABBITMQ_NODE_PORT: ${rabbit_port}
+  #     RABBITMQ_NODENAME: ${rabbit_host}
+  #   ports:
+  #     - "15672:15672"
+  #     - "${rabbit_port}:5672"
+  #   healthcheck:
+  #     test: rabbitmq-diagnostics -q ping
+  #     interval: 2s
+  #     timeout: 3s
+  #     retries: 40
+  #   logging:
+  #     options:
+  #       max-size: "10m"
+  #       max-file: "1"
+  #   mem_limit: 500M
+  #   mem_reservation: 500m
+  #   cpus: 1
 
 volumes:
-  db-data:
-    name: db-data
+  db-volume:
+    name: db-volume
     external: true
-  rabbit-data:
-    name: rabbit-data
-    external: true
+  # rabbit-volume:
+  #   name: rabbit-volume
+  #   external: true
